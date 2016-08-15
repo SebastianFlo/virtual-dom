@@ -50,15 +50,6 @@ function createElement(node) {
     return $el; //for elements { type: ‘…’, props: { … }, children: [ … ] }
 }
 
-const a = (
-    <ul class="list">
-        <li>item 1</li>
-        <li>item 2</li>
-    </ul>
-);
-
-const $root = document.getElementById('root');
-$root.appendChild(createElement(a));
 
 /* 
 
@@ -114,3 +105,26 @@ function updateElement($parent, newNode, oldNode, index = 0) {
 
 }
 
+
+const a = (
+    <ul class="list">
+        <li>item 1</li>
+        <li>item 2</li>
+    </ul>
+);
+
+const b = (
+  <ul>
+    <li>item 1</li>
+    <li>hello!</li>
+  </ul>
+);
+
+const $root = document.getElementById('root');
+const $reload = document.getElementById('reload');
+
+updateElement($root, a);
+
+$reload.addEventListener('click', () => {
+  updateElement($root, b, a);
+});
