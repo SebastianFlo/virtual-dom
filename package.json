@@ -2,9 +2,10 @@
   "name": "virtual-dom",
   "version": "1.0.0",
   "description": "Playing around with virtual dom",
-  "main": "index.js",
+  "main": "tree.js",
   "scripts": {
-    "test": "test"
+    "test": "test",
+    "build": "babel src -d lib"
   },
   "repository": {
     "type": "git",
