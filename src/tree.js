@@ -46,6 +46,7 @@ function createElement(node) {
     }
     const $el = document.createElement(node.type);
     setProps($el, node.props);
+    addEventListeners($el, node.props);
     node.children
         .map(createElement)
         .forEach($el.appendChild.bind($el));
@@ -66,7 +67,8 @@ function createElement(node) {
 function changed(node1, node2) {
     return typeof node1 !== typeof node2 || 
             typeof node1 === 'string' && node1 !== node2 ||
-            node1.type !== node2.type
+            node1.type !== node2.type ||
+            node1.props && node1.props.forceUpdate;
 }
 
 function updateElement($parent, newNode, oldNode, index = 0) {
@@ -141,7 +143,7 @@ function setBooleanProp($target, name, value) {
 }
 
 function isCustomProp(name) {
-  return false;
+  return isEventProp(name) || name === 'forceUpdate';
 }
 
 // removing props
@@ -178,32 +180,59 @@ function updateProps($target, newProps, oldProps = {}) {
     });
 }
 
+// events on[Click] 
+function isEventProp(name) {
+  return /^on/.test(name);
+}
+
+function extractEventName(name) {
+  return name.slice(2).toLowerCase();
+}
+
+function addEventListeners($target, props) {
+  Object.keys(props).forEach(name => {
+    if (isEventProp(name)) {
+      $target.addEventListener(
+        extractEventName(name),
+        props[name]
+      );
+    }
+  });
+}
+
 // class is a reserved work so we use className
-const a = (
-    <nav className='navbar light'>
-        <input type='checkbox' checked={false} />
-        <ul>
-            <li>item 1</li>
-            <li>item 2</li>
-        </ul>
-    </nav>
+function log(e) {
+  console.log(e.target.value);
+}
+
+const f = (
+  <ul style="list-style: none;">
+    <li className="item" onClick={() => alert('hi!')}>item 1</li>
+    <li className="item">
+      <input type="checkbox" checked={true} />
+      <input type="text" onInput={log} />
+    </li>
+    {/* this node will always be updated */}
+    <li forceUpdate={true}>text</li>
+  </ul>
 );
 
-const b = (
-    <nav className='navbar light'>
-        <input type='checkbox' checked={false} />
-        <ul>
-            <li>item 1</li>
-            <li>hello!</li>
-        </ul>
-    </nav>
+const g = (
+  <ul style="list-style: none;">
+    <li className="item item2" onClick={() => alert('hi!')}>item 1</li>
+    <li style="background: red;">
+      <input type="checkbox" checked={false} />
+      <input type="text" onInput={log} />
+    </li>
+    {/* this node will always be updated */}
+    <li forceUpdate={true}>text</li>
+  </ul>
 );
 
 const $root = document.getElementById('root');
 const $reload = document.getElementById('reload');
 
-updateElement($root, a);
-
+updateElement($root, f);
 $reload.addEventListener('click', () => {
-  updateElement($root, b, a);
+  updateElement($root, g, f);
 });
